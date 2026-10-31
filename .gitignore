@@ -1,0 +1,11 @@
+# Build artifacts
+*.obj
+*.o
+
+# Visual Studio / Editor files
+.vscode/
+.vs/
+
+# OS specific files
+Thumbs.db
+Desktop.ini

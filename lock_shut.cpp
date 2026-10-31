@@ -136,6 +136,40 @@ void ExecuteCode()
     input = "";
 }
 
+// Safely convert key press to digit (0-9) supporting top row and Numpad with or without NumLock
+int GetDigitFromKey(DWORD vkCode)
+{
+    // 1. Top number row ('0' to '9')
+    if (vkCode >= '0' && vkCode <= '9')
+    {
+        return (int)(vkCode - '0');
+    }
+
+    // 2. Standard Numeric Keypad with NumLock ON (VK_NUMPAD0 to VK_NUMPAD9)
+    if (vkCode >= VK_NUMPAD0 && vkCode <= VK_NUMPAD9)
+    {
+        return (int)(vkCode - VK_NUMPAD0);
+    }
+
+    // 3. Numeric Keypad with NumLock OFF (Windows maps them to navigation virtual keys)
+    switch (vkCode)
+    {
+        case VK_INSERT: return 0; // Numpad 0
+        case VK_END:    return 1; // Numpad 1
+        case VK_DOWN:   return 2; // Numpad 2
+        case VK_NEXT:   return 3; // Numpad 3 (PageDown)
+        case VK_LEFT:   return 4; // Numpad 4
+        case VK_CLEAR:  return 5; // Numpad 5
+        case VK_RIGHT:  return 6; // Numpad 6
+        case VK_HOME:   return 7; // Numpad 7
+        case VK_UP:     return 8; // Numpad 8
+        case VK_PRIOR:  return 9; // Numpad 9 (PageUp)
+        default:        break;
+    }
+
+    return -1;
+}
+
 LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
     if (nCode == HC_ACTION && wParam == WM_KEYDOWN)
@@ -143,16 +177,7 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
         if (IsDesktopActive())
         {
             KBDLLHOOKSTRUCT* key = (KBDLLHOOKSTRUCT*)lParam;
-            int digit = -1;
-
-            if (key->vkCode >= '0' && key->vkCode <= '9')
-            {
-                digit = key->vkCode - '0';
-            }
-            else if (key->vkCode >= VK_NUMPAD0 && key->vkCode <= VK_NUMPAD9)
-            {
-                digit = key->vkCode - VK_NUMPAD0;
-            }
+            int digit = GetDigitFromKey(key->vkCode);
 
             if (digit >= 0)
             {
